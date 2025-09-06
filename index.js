@@ -40,6 +40,31 @@ async function run() {
       res.send('Server is Running!');
     });
 
+    app.get('/events', async (req, res) => {
+      try {
+        const events = await eventsCollection.find({}).toArray();
+        res.status(200).send(events);
+      } catch (error) {
+        console.error(error);
+        res.status(500).send({ message: 'Failed to fetch events' });
+      }
+    });
+
+    app.get('/events/:id', async (req, res) => {
+      try {
+        const id = req.params.id;
+        const event = await eventsCollection.findOne({ _id: new ObjectId(id) });
+        if (event) {
+          res.status(200).send(event);
+        } else {
+          res.status(404).send({ message: 'Event not found' });
+        }
+      } catch (error) {
+        console.error(error);
+        res.status(500).send({ message: 'Failed to fetch event' });
+      }
+    });
+
     app.post('/events', async (req, res) => {
       try {
         const eventData = req.body;
