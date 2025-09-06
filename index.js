@@ -110,6 +110,36 @@ async function run() {
       }
     });
 
+    // Manage Events routes
+    app.get('/manageEvents', async (req, res) => {
+      try {
+        const email = req.query.email;
+        const events = await eventsCollection.find({ creatorEmail: email }).toArray();
+        // Map to expected format
+        const formattedEvents = events.map(event => ({
+          _id: event._id,
+          event_name: event.eventName,
+          event_date: event.eventDate,
+          location: event.description || "Location not specified"
+        }));
+        res.status(200).send(formattedEvents);
+      } catch (error) {
+        console.error(error);
+        res.status(500).send({ message: 'Failed to fetch events' });
+      }
+    });
+
+    app.delete('/manageEvents/:id', async (req, res) => {
+      try {
+        const id = req.params.id;
+        const result = await eventsCollection.deleteOne({ _id: new ObjectId(id) });
+        res.status(200).send(result);
+      } catch (error) {
+        console.error(error);
+        res.status(500).send({ message: 'Failed to delete event' });
+      }
+    });
+
     app.listen(port, () => {
       console.log(`Server running on port ${port}`);
     });
