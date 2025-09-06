@@ -76,6 +76,23 @@ async function run() {
       }
     });
 
+    app.put('/events/:id', async (req, res) => {
+      try {
+        const id = req.params.id;
+        const updatedData = req.body;
+        // Remove creatorEmail from update to prevent ownership change
+        delete updatedData.creatorEmail;
+        const result = await eventsCollection.updateOne(
+          { _id: new ObjectId(id) },
+          { $set: updatedData }
+        );
+        res.status(200).send(result);
+      } catch (error) {
+        console.error(error);
+        res.status(500).send({ message: 'Failed to update event' });
+      }
+    });
+
     // My Bookings routes
     app.get('/myBookings', async (req, res) => {
       try {
