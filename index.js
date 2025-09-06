@@ -32,8 +32,8 @@ async function run() {
   try {
     await client.connect();
 
-    let groupCollection = client.db("SportZone").collection("events");
     let eventsCollection = client.db("SportZone").collection("events");
+    let bookingsCollection = client.db("SportZone").collection("myBookings");
 
     // Routes
     app.get('/', (req, res) => {
@@ -73,6 +73,40 @@ async function run() {
       } catch (error) {
         console.error(error);
         res.status(500).send({ message: 'Failed to create event' });
+      }
+    });
+
+    // My Bookings routes
+    app.get('/myBookings', async (req, res) => {
+      try {
+        const email = req.query.email;
+        const bookings = await bookingsCollection.find({ userEmail: email }).toArray();
+        res.status(200).send(bookings);
+      } catch (error) {
+        console.error(error);
+        res.status(500).send({ message: 'Failed to fetch bookings' });
+      }
+    });
+
+    app.post('/myBookings', async (req, res) => {
+      try {
+        const bookingData = req.body;
+        const result = await bookingsCollection.insertOne(bookingData);
+        res.status(201).send({ message: 'Booking created successfully', insertedId: result.insertedId });
+      } catch (error) {
+        console.error(error);
+        res.status(500).send({ message: 'Failed to create booking' });
+      }
+    });
+
+    app.delete('/myBookings/:id', async (req, res) => {
+      try {
+        const id = req.params.id;
+        const result = await bookingsCollection.deleteOne({ _id: new ObjectId(id) });
+        res.status(200).send(result);
+      } catch (error) {
+        console.error(error);
+        res.status(500).send({ message: 'Failed to delete booking' });
       }
     });
 
