@@ -53,7 +53,17 @@ async function run() {
     app.get('/events/:id', async (req, res) => {
       try {
         const id = req.params.id;
-        const event = await eventsCollection.findOne({ _id: new ObjectId(id) });
+
+        // Check if the ID is a valid ObjectId (24 hex chars)
+        let query;
+        if (ObjectId.isValid(id) && id.length === 24) {
+          query = { _id: new ObjectId(id) };
+        } else {
+          // For simple string IDs like "001", "002", etc.
+          query = { _id: id };
+        }
+
+        const event = await eventsCollection.findOne(query);
         if (event) {
           res.status(200).send(event);
         } else {
@@ -82,10 +92,16 @@ async function run() {
         const updatedData = req.body;
         // Remove creatorEmail from update to prevent ownership change
         delete updatedData.creatorEmail;
-        const result = await eventsCollection.updateOne(
-          { _id: new ObjectId(id) },
-          { $set: updatedData }
-        );
+
+        // Check if the ID is a valid ObjectId
+        let query;
+        if (ObjectId.isValid(id) && id.length === 24) {
+          query = { _id: new ObjectId(id) };
+        } else {
+          query = { _id: id };
+        }
+
+        const result = await eventsCollection.updateOne(query, { $set: updatedData });
         res.status(200).send(result);
       } catch (error) {
         console.error(error);
@@ -119,7 +135,16 @@ async function run() {
     app.delete('/myBookings/:id', async (req, res) => {
       try {
         const id = req.params.id;
-        const result = await bookingsCollection.deleteOne({ _id: new ObjectId(id) });
+
+        // Check if the ID is a valid ObjectId
+        let query;
+        if (ObjectId.isValid(id) && id.length === 24) {
+          query = { _id: new ObjectId(id) };
+        } else {
+          query = { _id: id };
+        }
+
+        const result = await bookingsCollection.deleteOne(query);
         res.status(200).send(result);
       } catch (error) {
         console.error(error);
@@ -149,7 +174,16 @@ async function run() {
     app.delete('/manageEvents/:id', async (req, res) => {
       try {
         const id = req.params.id;
-        const result = await eventsCollection.deleteOne({ _id: new ObjectId(id) });
+
+        // Check if the ID is a valid ObjectId
+        let query;
+        if (ObjectId.isValid(id) && id.length === 24) {
+          query = { _id: new ObjectId(id) };
+        } else {
+          query = { _id: id };
+        }
+
+        const result = await eventsCollection.deleteOne(query);
         res.status(200).send(result);
       } catch (error) {
         console.error(error);
