@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 require('dotenv').config();
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
+const { getChatbotResponse } = require('./Chatbot');
 
 const app = express();
 const port = process.env.PORT || 5000;
@@ -188,6 +189,22 @@ async function run() {
       } catch (error) {
         console.error(error);
         res.status(500).send({ message: 'Failed to delete event' });
+      }
+    });
+
+    // Chatbot API endpoint
+    app.post('/api/chatbot', async (req, res) => {
+      try {
+        const { message } = req.body;
+        if (!message) {
+          return res.status(400).json({ error: 'Message is required' });
+        }
+        
+        const response = await getChatbotResponse(message);
+        res.json({ response });
+      } catch (error) {
+        console.error('Chatbot API error:', error);
+        res.status(500).json({ error: 'Failed to get chatbot response' });
       }
     });
 
